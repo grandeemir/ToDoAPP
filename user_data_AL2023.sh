@@ -19,7 +19,7 @@ mkdir -p $APP_DIR
 
 # -------------------------------------------------------------
 # NOTE: You should clone your code from your GitHub repository here
-# Example: git clone https://github.com/YOUR_USERNAME/todo-app-rds.git $APP_DIR
+git clone https://github.com/grandeemir/ToDoAPP.git $APP_DIR
 # If you pushed codes to EC2 manually, you can use the steps below:
 # -------------------------------------------------------------
 
@@ -64,3 +64,12 @@ systemctl enable todoapp
 systemctl start todoapp
 
 echo "Setup completed successfully. Application is running on port 80."
+
+
+#########################################################################
+
+# sudo dnf install -y mariadb105
+# mariadb -h your-rds-endpoint.rds.amazonaws.com -u admin -p
+# CREATE DATABASE taskdb;
+# exit
+# sudo systemctl restart todoapp
