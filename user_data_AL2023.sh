@@ -1,46 +1,46 @@
 #!/bin/bash
 # Amazon Linux 2023 EC2 User Data Script
-# Node.js ToDo Uygulaması ve RDS Bağlantısı Kurulumu
+# Node.js ToDo App and RDS Connection Setup
 
-# Çıktıları log dosyasına kaydet
+# Save outputs to a log file
 exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
-echo "Amazon Linux 2023 için kurulum başlatılıyor..."
+echo "Starting setup for Amazon Linux 2023..."
 
-# Sistemi güncelle
+# Update system
 dnf update -y
 
-# Node.js 20, npm ve git kurulumu
+# Install Node.js 20, npm and git
 dnf install -y nodejs npm git
 
-# Uygulama dizinini oluştur
+# Create application directory
 APP_DIR="/var/www/todoapp"
 mkdir -p $APP_DIR
 
 # -------------------------------------------------------------
-# NOT: Burada kendi GitHub deponuzdan kodları çekmeniz gerekir
-# Örnek: git clone https://github.com/KULLANICI_ADINIZ/todo-app-rds.git $APP_DIR
-# Eğer kodları EC2'ye manuel attıysanız/atıyorsanız aşağıdaki adımları kullanabilirsiniz:
+# NOTE: You should clone your code from your GitHub repository here
+# Example: git clone https://github.com/YOUR_USERNAME/todo-app-rds.git $APP_DIR
+# If you pushed codes to EC2 manually, you can use the steps below:
 # -------------------------------------------------------------
 
-# İlgili dizine git
+# Go to the application directory
 cd $APP_DIR
 
-# Bağımlılıkları yükle (Eğer kodlar bu dizindeyse)
+# Install dependencies (If codes are in this directory)
 # npm install
 
-# Yetkilendirme (ec2-user için)
+# Set permissions (for ec2-user)
 # chown -R ec2-user:ec2-user $APP_DIR
 
-# --- Çevresel Değişkenler (.env) ---
-# DİKKAT: EC2'yi ayağa kaldırırken bu kısmı KENDİ RDS BİLGİLERİNİZ ile değiştirin!
+# --- Environment Variables (.env) ---
+# WARNING: Replace this part with YOUR OWN RDS CREDENTIALS when launching EC2!
 # echo "PORT=80" > .env
-# echo "DB_HOST=sizin_rds_endpoint_adresiniz" >> .env
+# echo "DB_HOST=your_rds_endpoint_address" >> .env
 # echo "DB_USER=admin" >> .env
-# echo "DB_PASSWORD=sifreniz" >> .env
+# echo "DB_PASSWORD=your_password" >> .env
 # echo "DB_NAME=tododb" >> .env
 
-# Uygulamayı ayakta tutmak için Systemd servisi oluşturma
+# Create Systemd service to keep the application running
 cat <<EOF > /etc/systemd/system/todoapp.service
 [Unit]
 Description=Node.js ToDo App with RDS
@@ -58,9 +58,9 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF
 
-# Servisi etkinleştir ve başlat
+# Enable and start the service
 systemctl daemon-reload
 systemctl enable todoapp
 systemctl start todoapp
 
-echo "Kurulum başarıyla tamamlandı. Uygulama port 80 üzerinde çalışıyor."
+echo "Setup completed successfully. Application is running on port 80."

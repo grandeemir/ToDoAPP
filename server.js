@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// MySQL Bağlantı Havuzu
+// MySQL Connection Pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -23,7 +23,7 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-// Veritabanı ve Tabloyu Başlatma
+// Initialize Database and Table
 async function initDB() {
   try {
     const connection = await pool.getConnection();
@@ -36,43 +36,43 @@ async function initDB() {
       )
     `);
     connection.release();
-    console.log('Veritabanı başarıyla başlatıldı. "todos" tablosu hazır.');
+    console.log('Database initialized successfully. "todos" table is ready.');
   } catch (error) {
-    console.error('Veritabanı başlatılırken hata oluştu. RDS bağlantınızı ve .env bilgilerinizi kontrol edin:', error.message);
+    console.error('Error initializing database. Check your RDS connection and .env credentials:', error.message);
   }
 }
 initDB();
 
-// API Endpointleri
+// API Endpoints
 
-// Tüm görevleri getir
+// Get all todos
 app.get('/api/todos', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM todos ORDER BY created_at DESC');
     res.json(rows);
   } catch (error) {
-    console.error('Görevler getirilirken hata:', error);
-    res.status(500).json({ error: 'Sunucu hatası' });
+    console.error('Error fetching todos:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Yeni görev ekle
+// Add new todo
 app.post('/api/todos', async (req, res) => {
   const { title } = req.body;
   if (!title) {
-    return res.status(400).json({ error: 'Başlık gereklidir' });
+    return res.status(400).json({ error: 'Title is required' });
   }
   try {
     const [result] = await pool.query('INSERT INTO todos (title) VALUES (?)', [title]);
     const [newTodo] = await pool.query('SELECT * FROM todos WHERE id = ?', [result.insertId]);
     res.status(201).json(newTodo[0]);
   } catch (error) {
-    console.error('Görev eklenirken hata:', error);
-    res.status(500).json({ error: 'Sunucu hatası' });
+    console.error('Error adding todo:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Görevi güncelle (tamamlandı durumu)
+// Update todo (completed status)
 app.put('/api/todos/:id', async (req, res) => {
   const { id } = req.params;
   const { completed } = req.body;
@@ -80,29 +80,29 @@ app.put('/api/todos/:id', async (req, res) => {
     await pool.query('UPDATE todos SET completed = ? WHERE id = ?', [completed, id]);
     res.json({ success: true });
   } catch (error) {
-    console.error('Görev güncellenirken hata:', error);
-    res.status(500).json({ error: 'Sunucu hatası' });
+    console.error('Error updating todo:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Görevi sil
+// Delete todo
 app.delete('/api/todos/:id', async (req, res) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM todos WHERE id = ?', [id]);
     res.json({ success: true });
   } catch (error) {
-    console.error('Görev silinirken hata:', error);
-    res.status(500).json({ error: 'Sunucu hatası' });
+    console.error('Error deleting todo:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Load Balancer (ALB) ve EC2 Health Check Endpointi
+// Load Balancer (ALB) and EC2 Health Check Endpoint
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
 const PORT = process.env.PORT || 80;
 app.listen(PORT, () => {
-  console.log(\`Sunucu \${PORT} portunda çalışıyor\`);
+  console.log(`server ${PORT} working`);
 });

@@ -1,7 +1,7 @@
 {
   "name": "todo-app-rds",
   "version": "1.0.0",
-  "description": "Yüksek kaliteli ToDo Uygulaması (EC2 AL2023 ve RDS MySQL için)",
+  "description": "High quality ToDo Application (for EC2 AL2023 and RDS MySQL)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

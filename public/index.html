@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RDS Bağlantılı ToDo Uygulaması</title>
+    <title>ToDo App with RDS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -155,19 +155,19 @@
 <body>
 
     <div class="container">
-        <h1>Görevlerim</h1>
+        <h1>My Tasks</h1>
         <form id="todo-form" class="input-group">
-            <input type="text" id="todo-input" placeholder="Ne yapılması gerekiyor?" required autocomplete="off">
-            <button type="submit">Ekle</button>
+            <input type="text" id="todo-input" placeholder="What needs to be done?" required autocomplete="off">
+            <button type="submit">Add</button>
         </form>
         <ul id="todo-list">
             <!-- Todos will be injected here -->
         </ul>
         <div id="empty-state" class="empty-state" style="display: none;">
-            Henüz görev yok. Yukarıdan ekleyin!
+            No tasks yet. Add one above!
         </div>
         <div class="status-bar" id="status-bar">
-            RDS Veritabanına bağlanılıyor...
+            Connecting to RDS Database...
         </div>
     </div>
 
@@ -182,14 +182,14 @@
         async function fetchTodos() {
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error('API Hatası');
+                if (!response.ok) throw new Error('API Error');
                 const todos = await response.json();
                 renderTodos(todos);
-                statusBar.textContent = 'RDS Veritabanına bağlı ✅';
+                statusBar.textContent = 'Connected to RDS Database ✅';
                 statusBar.style.color = '#10B981';
             } catch (error) {
-                console.error('Hata:', error);
-                statusBar.textContent = 'Veritabanı bağlantısı koptu veya kurulamadı ❌';
+                console.error('Error:', error);
+                statusBar.textContent = 'Database connection lost or could not be established ❌';
                 statusBar.style.color = 'var(--danger)';
             }
         }
@@ -206,10 +206,10 @@
                     
                     li.innerHTML = `
                         <div class="todo-left">
-                            <input type="checkbox" \${todo.completed ? 'checked' : ''} onchange="toggleTodo(\${todo.id}, this.checked)">
-                            <span class="todo-text">\${escapeHTML(todo.title)}</span>
+                            <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${todo.id}, this.checked)">
+                            <span class="todo-text">${escapeHTML(todo.title)}</span>
                         </div>
-                        <button class="delete-btn" onclick="deleteTodo(\${todo.id})">
+                        <button class="delete-btn" onclick="deleteTodo(${todo.id})">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                     `;
@@ -232,31 +232,31 @@
                 });
                 if (response.ok) fetchTodos();
             } catch (error) {
-                console.error('Görev eklenirken hata:', error);
+                console.error('Error adding todo:', error);
             }
         });
 
         async function toggleTodo(id, completed) {
             try {
-                await fetch(\`\${API_URL}/\${id}\`, {
+                await fetch(`${API_URL}/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ completed: completed ? 1 : 0 })
                 });
                 fetchTodos();
             } catch (error) {
-                console.error('Görev durumu güncellenirken hata:', error);
+                console.error('Error updating todo status:', error);
             }
         }
 
         async function deleteTodo(id) {
             try {
-                await fetch(\`\${API_URL}/\${id}\`, {
+                await fetch(`${API_URL}/${id}`, {
                     method: 'DELETE'
                 });
                 fetchTodos();
             } catch (error) {
-                console.error('Görev silinirken hata:', error);
+                console.error('Error deleting todo:', error);
             }
         }
 
@@ -272,7 +272,7 @@
             );
         }
 
-        // Başlangıçta görevleri çek
+        // Fetch tasks initially
         fetchTodos();
     </script>
 </body>
