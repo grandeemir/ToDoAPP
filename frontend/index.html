@@ -172,7 +172,10 @@
     </div>
 
     <script>
-        const API_URL = '/api/todos';
+        // BACKEND_URL'i backend sunucunuzun IP adresi veya domaini ile değiştirin.
+        // Örn: 'http://3.123.45.67'
+        const BACKEND_URL = ''; 
+        const API_URL = `${BACKEND_URL}/api/todos`;
         const todoForm = document.getElementById('todo-form');
         const todoInput = document.getElementById('todo-input');
         const todoList = document.getElementById('todo-list');
